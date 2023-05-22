@@ -1,24 +1,26 @@
 import tkinter as tk
 import customtkinter as ctk
-from customtkinter import *
 from tkinter import * 
 import pymssql
-import pandas as pd 
+
 
 
 # collegamento db
-conn = pymssql.connect(server='5.172.64.20\sqlexpress', user='porta.matteo', password='xxx123##', database='porta.matteo')
+conn = pymssql.connect(server='192.168.40.16\SQLEXPRESS', user='porta.matteo', password='xxx123##', database='porta.matteo')
 
 window = ctk.CTk()
 
 # specifiche finestra
-window.geometry("600x600")
-window.title("Hello TkInter!")
+window.geometry("800x600")
+window.title("Tkinter Poots GUI")
 window.resizable(False, False)  # L'utente non può modificare la grandezza della finestra 
 
 
 ctk.set_appearance_mode("Dark")  # Modes: system (default), light, dark
 ctk.set_default_color_theme("green")  # Themes: blue (default), dark-blue, green
+
+
+
 # funzioni
 '''
 def first_print():
@@ -42,10 +44,30 @@ second_button = tk.Button(text="Seconda Funzione", command=second_function)
 second_button.grid(row=1, column=0, pady=20, sticky="W")
 '''
 
-label1 = tk.Label(window,text='Opzioni',fg="white",bg="#212325",font=("Helvetica", 24))
-label1.grid(row=0, column=1 ,columnspan=2,sticky="N")
+#label1 = tk.Label(window,text='Opzioni',fg="white",bg="#212325",font=("Helvetica", 24))
+#label1.grid(row=0, column=1 ,columnspan=2,sticky="N")
 
 
+def visualizza_utenti():
+    cursor = conn.cursor()
+
+    # Esegue la query per recuperare gli utenti
+    cursor.execute('SELECT * FROM utente')
+    users = cursor.fetchall()
+
+    # Chiude la connessione al server SQL
+    conn.close()
+
+    # Visualizza gli utenti nella finestra
+    for i, user in enumerate(users):
+        for j, value in enumerate(user):
+            label = ctk.CTkLabel(window, text=value)
+            label.grid(row=i+1, column=j,sticky="W",padx=10, pady=10)
+            modica = ctk.CTkButton(master=window,text="Modifica")
+            modica.grid(row=i+1,column=4,sticky="E",padx=20)
+            cancella = ctk.CTkButton(master=window,text="Cancella")
+            cancella.grid(row=i+1,column=7,sticky="E")
+'''
 def add_utente():
     if nome_input.get() != '' and cognome_input != '':
         nome_text = nome_input.get()
@@ -82,6 +104,9 @@ def delete_utente():
         response_label = ctk.CTkLabel(window,text='Devi inserire il tuo nome e congome',font=("Helvetica", 15))
         response_label.grid(row=4, columnspan=2, sticky="WE")
 
+
+
+
 # Aggiungi Utente
 
 
@@ -97,8 +122,22 @@ cognome_input.grid(row=2, column=1, sticky="WE",padx=10,pady=10)
 invio_input = ctk.CTkButton(master=window,text="Aggiungi Utente", command=add_utente)
 invio_input.grid(row=3, column=0)
 
+
 # Cancella Utente
 invio_input = ctk.CTkButton(master=window,text="Cancella Utente", command=delete_utente)
 invio_input.grid(row=3, column=1)
+'''
+
+# V ISUALIZZA UTENTI 
+visualizza_utenti()
+
+header1 = ctk.CTkLabel(master=window, text="Id ",font=('Chaparral Pro', 18, 'bold'))
+header1.grid(row=0, column=0,padx=10,sticky="W")
+header2 = ctk.CTkLabel(master=window, text="Username ",font=('Chaparral Pro', 18, 'bold'))
+header2.grid(row=0, column=1,padx=10,sticky="W")
+header3 = ctk.CTkLabel(master=window,padx=10, text="Email ",font=('Chaparral Pro', 18, 'bold'))
+header3.grid(row=0, column=2,padx=10,sticky="W")
+header4 = ctk.CTkLabel(master=window, text="Password ",font=('Chaparral Pro', 18, 'bold'))
+header4.grid(row=0, column=3,padx=10,sticky="W")
 
 window.mainloop()
