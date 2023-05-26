@@ -6,7 +6,7 @@ import pymssql
 
 
 # collegamento db
-conn = pymssql.connect(server='192.168.40.16\SQLEXPRESS', user='porta.matteo', password='xxx123##', database='porta.matteo')
+conn = pymssql.connect(server='5.172.64.20\sqlexpress', user='porta.matteo', password='xxx123##', database='porta.matteo')
 
 window = ctk.CTk()
 
@@ -14,6 +14,24 @@ window = ctk.CTk()
 window.geometry("800x600")
 window.title("Tkinter Poots GUI")
 window.resizable(False, False)  # L'utente non può modificare la grandezza della finestra 
+
+window.columnconfigure(0, weight=1)
+window.columnconfigure(1, weight=1)
+window.columnconfigure(2, weight=1)
+
+
+
+
+# text = tk.Text(window, height=10)
+# text.grid(row=0, column=0, sticky=tk.EW)
+# scrollbar = tk.Scrollbar(window, orient='vertical', command=text.yview)
+# scrollbar.grid(row=0, column=1, sticky=tk.NS)
+# text['yscrollcommand'] = scrollbar.set
+
+# # add sample text to the text widget to show the screen
+# for i in range(1,50):
+#     position = f'{i}.0'
+#     text.insert(position,f'Line {i}\n');
 
 
 ctk.set_appearance_mode("Dark")  # Modes: system (default), light, dark
@@ -56,17 +74,41 @@ def visualizza_utenti():
     users = cursor.fetchall()
 
     # Chiude la connessione al server SQL
-    conn.close()
+
 
     # Visualizza gli utenti nella finestra
+    lista = []
     for i, user in enumerate(users):
         for j, value in enumerate(user):
+            print(j,value)
             label = ctk.CTkLabel(window, text=value)
             label.grid(row=i+1, column=j,sticky="W",padx=10, pady=10)
-            modica = ctk.CTkButton(master=window,text="Modifica")
-            modica.grid(row=i+1,column=4,sticky="E",padx=20)
-            cancella = ctk.CTkButton(master=window,text="Cancella")
-            cancella.grid(row=i+1,column=7,sticky="E")
+            lista.append(value) if j == 0 else None
+
+        modifica = ctk.CTkButton(master=window,text="Modifica" ,command=lambda x=lista[i]: modifica_utente(x))
+        modifica.grid(row=i+1,column=4,sticky="E",padx=20)
+        cancella = ctk.CTkButton(master=window,text="Cancella" ,command=lambda x=i: cancella_utente(x))
+        cancella.grid(row=i+1,column=7,sticky="E")
+    print(lista)
+
+
+def modifica_utente(x):
+    print(x)
+    return x 
+
+def cancella_utente(x):
+    print(x)
+    cursor = conn.cursor()
+
+    # Esegue la query per recuperare gli utenti
+    cursor.execute(f'DELETE FROM utente WHERE Id = {x}')
+    conn.commit()
+    # Chiude la connessione al server SQL
+
+
+    return x
+
+
 '''
 def add_utente():
     if nome_input.get() != '' and cognome_input != '':
@@ -132,12 +174,15 @@ invio_input.grid(row=3, column=1)
 visualizza_utenti()
 
 header1 = ctk.CTkLabel(master=window, text="Id ",font=('Chaparral Pro', 18, 'bold'))
-header1.grid(row=0, column=0,padx=10,sticky="W")
+header1.grid(row=0, column=0,padx=10,pady=10,sticky="W")
 header2 = ctk.CTkLabel(master=window, text="Username ",font=('Chaparral Pro', 18, 'bold'))
-header2.grid(row=0, column=1,padx=10,sticky="W")
+header2.grid(row=0, column=1,padx=10,pady=10,sticky="W")
 header3 = ctk.CTkLabel(master=window,padx=10, text="Email ",font=('Chaparral Pro', 18, 'bold'))
-header3.grid(row=0, column=2,padx=10,sticky="W")
+header3.grid(row=0, column=2,padx=10,pady=10,sticky="W")
 header4 = ctk.CTkLabel(master=window, text="Password ",font=('Chaparral Pro', 18, 'bold'))
-header4.grid(row=0, column=3,padx=10,sticky="W")
+header4.grid(row=0, column=3,padx=10,pady=10,sticky="W")
+
+
+
 
 window.mainloop()
