@@ -6,7 +6,7 @@ import pymssql
 
 
 # collegamento db
-conn = pymssql.connect(server='5.172.64.20\sqlexpress', user='porta.matteo', password='xxx123##', database='porta.matteo')
+conn = pymssql.connect(server='192.168.40.16\sqlexpress', user='porta.matteo', password='xxx123##', database='porta.matteo')
 
 window = ctk.CTk()
 
@@ -38,6 +38,56 @@ ctk.set_appearance_mode("Dark")  # Modes: system (default), light, dark
 ctk.set_default_color_theme("green")  # Themes: blue (default), dark-blue, green
 
 
+def openNewWindow():
+     
+    # Toplevel object which will
+    # be treated as a new window
+    newWindow = ctk.CTkToplevel(window)
+ 
+    # sets the title of the
+    # Toplevel widget
+    newWindow.title("Finestra di Ricerca")
+ 
+    # sets the geometry of toplevel
+    newWindow.geometry("500x800")
+ 
+    # A Label widget to show in toplevel
+    Label(newWindow,
+          text ="This is a new window")
+ 
+ 
+    label = Label(window,
+                text ="This is the main window", font=("Helvetica", 18))
+ 
+    Frm = ctk.CTkFrame(newWindow)
+    Label(Frm,text='Enter Word to Find:').pack(side=LEFT)
+    modify = ctk.CTkEntry(Frm)
+
+    modify.pack(side=LEFT, fill=BOTH, expand=1)
+
+    modify.focus_set()
+
+    buttn = ctk.CTkButton(Frm, text='Find')
+    buttn.pack(side=RIGHT)
+    Frm.pack(side=TOP)
+
+    txt = Text()
+
+    txt.insert('1.0','''Enter here...''')
+    txt.pack(side=BOTTOM)
+
+
+
+
+# a button widget which will open a
+# new window on button click
+btn = ctk.CTkButton(master=window,
+             text ="Ricerca",
+             command = openNewWindow).grid(row=10, column=3,padx=20,pady=20,sticky="W")
+
+             
+
+
 
 # funzioni
 '''
@@ -66,6 +116,11 @@ second_button.grid(row=1, column=0, pady=20, sticky="W")
 #label1.grid(row=0, column=1 ,columnspan=2,sticky="N")
 
 
+
+Label(window,text='Enter Word to Find:')
+
+
+
 def visualizza_utenti():
     cursor = conn.cursor()
 
@@ -87,7 +142,7 @@ def visualizza_utenti():
 
         modifica = ctk.CTkButton(master=window,text="Modifica" ,command=lambda x=lista[i]: modifica_utente(x))
         modifica.grid(row=i+1,column=4,sticky="E",padx=20)
-        cancella = ctk.CTkButton(master=window,text="Cancella" ,command=lambda x=i: cancella_utente(x))
+        cancella = ctk.CTkButton(master=window,text="Cancella" ,command=lambda x=lista[i]: cancella_utente(x))
         cancella.grid(row=i+1,column=7,sticky="E")
     print(lista)
 
