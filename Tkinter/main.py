@@ -4,51 +4,46 @@ from tkinter import *
 import pymssql
 
 
+ctk.set_appearance_mode("Dark")  # Modes: system (default), light, dark
+ctk.set_default_color_theme("green")  # Themes: blue (default), dark-blue, green
 
 # collegamento db
 conn = pymssql.connect(server='5.172.64.20\sqlexpress', user='porta.matteo', password='xxx123##', database='porta.matteo')
+labels = []
 window = ctk.CTk()
 
 # specifiche finestra
 window.geometry("800x600")
 window.title("Tkinter Poots GUI")
-window.resizable(False, False)  # L'utente non può modificare la grandezza della finestra 
+window.resizable(False, False)  # L'utente non puÃ² modificare la grandezz a della finestra 
 
 window.columnconfigure(0, weight=1)
 window.columnconfigure(1, weight=1)
-window.columnconfigure(2, weight=1)
-
-
-
-
-# text = tk.Text(window, height=10)
-# text.grid(row=0, column=0, sticky=tk.EW)
-# scrollbar = tk.Scrollbar(window, orient='vertical', command=text.yview)
-# scrollbar.grid(row=0, column=1, sticky=tk.NS)
-# text['yscrollcommand'] = scrollbar.set
-
-# # add sample text to the text widget to show the screen
-# for i in range(1,50):
-#     position = f'{i}.0'
-#     text.insert(position,f'Line {i}\n');
-
-
-ctk.set_appearance_mode("Dark")  # Modes: system (default), light, dark
-ctk.set_default_color_theme("green")  # Themes: blue (default), dark-blue, green
-
-
-
-
+window.columnconfigure(2, weight=1) 
+window.columnconfigure(3, weight=1) 
+window.columnconfigure(4, weight=1) 
+window.columnconfigure(5, weight=1) 
 
 def add_utente(new_user):
-        cursor = conn.cursor(as_dict=True)
-        p = {"name": f"{new_user[0]}","email": f"{new_user[1]}","pwd": f"{new_user[2]}"}
-        q = 'INSERT INTO utente VALUES(%(name)s, %(email)s, %(pwd)s)' 
-        cursor.execute(q, p)
-        conn.commit()
-        # Chiude la connessione al server SQL
-        cursor.close()
-        return 'ciao'
+    if new_user[0] == '' or new_user[1] == '' or new_user[2] == '':
+        return print('vuoto')
+    cursor = conn.cursor(as_dict=True)
+
+    p = {"name": f"{new_user[0]}","email": f"{new_user[1]}"}
+    q = 'SELECT * FROM utente WHERE Username like %(name)s and Email = %(email)s' 
+    cursor.execute(q, p)
+    user = cursor.fetchall()
+    if user != []:
+        return print('esiste gia')
+
+    p = {"name": f"{new_user[0]}","email": f"{new_user[1]}","pwd": f"{new_user[2]}"}
+    q = 'INSERT INTO utente VALUES(%(name)s, %(email)s, %(pwd)s)' 
+    cursor.execute(q, p)
+    conn.commit()
+    # Chiude la connessione al server SQL
+    cursor.close()
+    return remove_label("")
+
 
 def finestra_crea():
     # Toplevel object which will
@@ -62,17 +57,16 @@ def finestra_crea():
     # sets the geometry of toplevel
     newWindow.geometry("400x200")
  
-    Frm = ctk.CTkFrame(master = newWindow)
-    Frm.grid(row=0, column = 0,padx=20,pady=20, sticky="nsew")
+    newWindow.columnconfigure(0, weight=1)
 
-    name = ctk.CTkEntry(Frm,placeholder_text="name")
-    name.grid(row=5, column = 0,padx=20,pady=20,sticky="W")
+    name = ctk.CTkEntry(newWindow,placeholder_text="Username")
+    name.grid(row=0, column = 0, pady=7,sticky="WE")
 
-    email = ctk.CTkEntry(Frm,placeholder_text="email")
-    email.grid(row=5, column =1,padx=20,pady=20,sticky="W")
+    email = ctk.CTkEntry(newWindow,placeholder_text="Email")
+    email.grid(row=1, column =0, pady=7,sticky="WE")
 
-    pwd = ctk.CTkEntry(Frm,placeholder_text="password")
-    pwd.grid(row=7, column =0,padx=20,pady=20,sticky="W")
+    pwd = ctk.CTkEntry(newWindow,placeholder_text="Password")
+    pwd.grid(row=2, column =0, pady=7,sticky="WE")
 
 
     def click():
@@ -86,84 +80,89 @@ def finestra_crea():
 
 
 
-    buttn = ctk.CTkButton(master=Frm, text='Crea Utente', command=click)
-    buttn.grid(row=7, column = 1,padx=20,pady=20,sticky="W") 
+    buttn = ctk.CTkButton(newWindow, text='Crea Utente', command=click)
+    buttn.grid(row=3, column = 0, pady=7,sticky="WE") 
 # a button widget which will open a
 # new window on button click
-btn = ctk.CTkButton(master=window,
-             text ="Crea",
-             command = finestra_crea).grid(row=10, column=3,padx=20,pady=20,sticky="W")
+btn = ctk.CTkButton(window,text ="Crea",command = finestra_crea)
+btn.grid(row=0, column=5,padx=20,pady=20,sticky="E")
 
+def getInput():
+   
+    inputUtente = input.get()  
+    print(inputUtente)
+    return remove_label(inputUtente)
 
+def remove_label(x):
+    global labels
+    for label in labels:
+        label.destroy()
 
-# funzioni
-'''
-def first_print():
-    text = "Hello World!"
-    text_output = tk.Label(window, text=text, fg="red", font=("Helvetica", 16))
-    text_output.grid(row=0, column=1)
+    labels = []
 
-def second_function():
-    text = "Nuovo Messaggio! Nuova Funzione!"
-    text_output = tk.Label(window, text=text, fg="green", font=("Helvetica", 16))
-    text_output.grid(row=1, column=1)
+    return visualizza_utenti(x)
 
-
-
-
-# bottoni
-first_button = tk.Button(text="Saluta!", command=first_print)
-first_button.grid(row=0, column=0, sticky="W")
-
-second_button = tk.Button(text="Seconda Funzione", command=second_function)
-second_button.grid(row=1, column=0, pady=20, sticky="W")
-'''
-
-#label1 = tk.Label(window,text='Opzioni',fg="white",bg="#212325",font=("Helvetica", 24))
-#label1.grid(row=0, column=1 ,columnspan=2,sticky="N")
-
-
-
-Label(window,text='Enter Word to Find:')
-
-
-
-def visualizza_utenti():
+def visualizza_utenti(x):
+    print(x)
     cursor = conn.cursor()
     # Esegue la query per recuperare gli utenti
-    cursor.execute('SELECT * FROM utente')
+    
+    if x == "":    
+         cursor.execute('SELECT * FROM utente')
+    else:
+        cursor.execute(f"SELECT * FROM utente WHERE Username LIKE '{x}%'")
+        
+        
+
     users = cursor.fetchall()
 
     # Chiude il cursor
     cursor.close()
-
+    
+   
     # Visualizza gli utenti nella finestra
+    
     lista = []
     for i, user in enumerate(users):
         for j, value in enumerate(user):
             print(j,value)
             label = ctk.CTkLabel(window, text=value)
-            label.grid(row=i+1, column=j,sticky="W",padx=10, pady=10)
+            label.grid(row=i+2, column=j,sticky="W",padx=10, pady=10)
             lista.append(value) if j == 0 else None
-
+            labels.append(label)
+         
         modifica = ctk.CTkButton(master=window,text="Modifica" ,command=lambda x=lista[i]: finestra_modifica(x))
-        modifica.grid(row=i+1,column=4,sticky="E",padx=20)
-        cancella = ctk.CTkButton(master=window,text="Cancella" ,command=lambda x=lista[i]: cancella_utente(x))
-        cancella.grid(row=i+1,column=7,sticky="E")
+        modifica.grid(row=i+2,column=4,sticky="WE",padx=20)
+        labels.append(modifica)
+        cancella = ctk.CTkButton(master=window,text="Cancella",hover_color='#52170b',fg_color='red' ,command=lambda x=lista[i]: cancella_utente(x))
+        cancella.grid(row=i+2,column=5,sticky="WE",padx=20)
+        labels.append(cancella)
+        
+
+            
+
     print(lista)
 
-
 def modifica_utente(new_user,x):
-    print(new_user)
-  
+    
+    if new_user[0] == '' or new_user[1] == '' or new_user[2] == '':
+        return print('vuoto')
     cursor = conn.cursor()
+
+    p = {"name": f"{new_user[0]}","email": f"{new_user[1]}"}
+    q = 'SELECT * FROM utente WHERE Username like %(name)s and Email = %(email)s' 
+    cursor.execute(q, p)
+    user = cursor.fetchall()
+    if user != []:
+        return print('esiste gia')
+
     # Esegue la query per recuperare gli utenti
     p = {"name": f"{new_user[0]}","email": f"{new_user[1]}","pwd": f"{new_user[2]}"}
     cursor.execute(f'UPDATE utente SET Username = %(name)s, Email = %(email)s, password = %(pwd)s WHERE Id = {x}', p)
     conn.commit()
     # Chiude la connessione al server SQL
     cursor.close()
-    return 'ciao'
+    return remove_label("")
 
 def finestra_modifica(x):
 
@@ -181,18 +180,17 @@ def finestra_modifica(x):
  
     # sets the geometry of toplevel
     newWindow.geometry("400x200")
- 
-    Frm = ctk.CTkFrame(master = newWindow)
-    Frm.grid(row=0, column = 0,padx=20,pady=20, sticky="nsew")
 
-    name = ctk.CTkEntry(Frm,placeholder_text=f"{user[1]}")
-    name.grid(row=5, column = 0,padx=20,pady=20,sticky="W")
+    newWindow.columnconfigure(0, weight=1)
 
-    email = ctk.CTkEntry(Frm,placeholder_text=f"{user[2]}")
-    email.grid(row=5, column =1,padx=20,pady=20,sticky="W")
+    name = ctk.CTkEntry(newWindow,placeholder_text=f"{user[1]}")
+    name.grid(row=0, column = 0, pady=7,sticky="WE")
 
-    pwd = ctk.CTkEntry(Frm,placeholder_text=f"{user[3]}")
-    pwd.grid(row=7, column =0,padx=20,pady=20,sticky="W")
+    email = ctk.CTkEntry(newWindow,placeholder_text=f"{user[2]}")
+    email.grid(row=1, column = 0, pady=7,sticky="WE")
+
+    pwd = ctk.CTkEntry(newWindow,placeholder_text=f"{user[3]}")
+    pwd.grid(row=2, column = 0, pady=7,sticky="WE")
 
         
     def click():
@@ -206,12 +204,16 @@ def finestra_modifica(x):
 
 
 
-    buttn = ctk.CTkButton(master=Frm, text='Modifica',command=click)
-    buttn.grid(row=7, column = 1,padx=20,pady=20,sticky="W")
+    buttn = ctk.CTkButton(newWindow, text='Modifica',command=click)
+    buttn.grid(row=3, column = 0, pady=7,sticky="WE")
 
+    return x  
 
-    return x 
+input = ctk.CTkEntry(window,width=400,height=35)
+input.grid(row=0,columnspan=3, sticky=W,padx= 10,pady= 10)
 
+getButton = ctk.CTkButton(window,text="Cerca", command=getInput)
+getButton.grid(row=0,column=3,sticky=W)
 
 def cancella_utente(x):
     print(x)
@@ -221,84 +223,17 @@ def cancella_utente(x):
     conn.commit()
     # Chiude la connessione al server SQL
     cursor.close()
-    window.update()
-    return x
 
-
-'''
-def add_utente():
-    if nome_input.get() != '' and cognome_input != '':
-        nome_text = nome_input.get()
-        cognome_text = cognome_input.get()
-        cursor = conn.cursor(as_dict=True)
-        q = 'INSERT INTO test(nome,cognome) VALUES(%(nome)s, %(cognome)s)' 
-        p = {"nome": f"{nome_text}","cognome": f"{cognome_text}"}
-        cursor.execute(q, p)
-        conn.commit()
-
-        
-        response_label = ctk.CTkLabel(master=window,text='Utente aggiunto',font=("Helvetica", 15))
-        response_label.grid(row=4, columnspan=2, sticky="WE")
-                
-    else:
-        response_label = ctk.CTkLabel(master=window,text='Devi inserire il tuo nome e congome',font=("Helvetica", 15))
-        response_label.grid(row=4, columnspan=2, sticky="WE")
-
-def delete_utente():
-    if nome_input.get() != '' and cognome_input != '':
-        nome_text = nome_input.get()
-        cognome_text = cognome_input.get()
-        cursor = conn.cursor(as_dict=True)
-        q = 'DELETE FROM test WHERE nome = %(nome)s AND cognome = %(cognome)s' 
-        p = {"nome": f"{nome_text}","cognome": f"{cognome_text}"}
-        cursor.execute(q, p)
-        conn.commit()
-
-        
-        response_label = ctk.CTkLabel(master=window,text='Utente Cancellato',font=("Helvetica", 15))
-        response_label.grid(row=4, columnspan=2, sticky="WE")
-                
-    else:
-        response_label = ctk.CTkLabel(window,text='Devi inserire il tuo nome e congome',font=("Helvetica", 15))
-        response_label.grid(row=4, columnspan=2, sticky="WE")
-
-
-
-
-# Aggiungi Utente
-
-
-#  INPUT NOME
-nome_input = ctk.CTkEntry(master=window,border_width=3,fg_color="white",text_color="#2DA775",border_color="#2DA775")
-nome_input.grid(row=2, column=0, sticky="WE",padx=10,pady=10)
-
-#  INPUT COGNOME
-cognome_input = ctk.CTkEntry(master=window,border_width=3,fg_color="white",text_color="#2DA775",border_color="#2DA775")
-cognome_input.grid(row=2, column=1, sticky="WE",padx=10,pady=10)
-
-
-invio_input = ctk.CTkButton(master=window,text="Aggiungi Utente", command=add_utente)
-invio_input.grid(row=3, column=0)
-
-
-# Cancella Utente
-invio_input = ctk.CTkButton(master=window,text="Cancella Utente", command=delete_utente)
-invio_input.grid(row=3, column=1)
-'''
-
-# V ISUALIZZA UTENTI 
-visualizza_utenti()
+    return remove_label("")
 
 header1 = ctk.CTkLabel(master=window, text="Id ",font=('Chaparral Pro', 18, 'bold'))
-header1.grid(row=0, column=0,padx=10,pady=10,sticky="W")
+header1.grid(row=1, column=0,padx=10,pady=10,sticky="W")
 header2 = ctk.CTkLabel(master=window, text="Username ",font=('Chaparral Pro', 18, 'bold'))
-header2.grid(row=0, column=1,padx=10,pady=10,sticky="W")
-header3 = ctk.CTkLabel(master=window,padx=10, text="Email ",font=('Chaparral Pro', 18, 'bold'))
-header3.grid(row=0, column=2,padx=10,pady=10,sticky="W")
+header2.grid(row=1, column=1,padx=10,pady=10,sticky="W")
+header3 = ctk.CTkLabel(master=window,padx=0,pady=10, text="Email ",font=('Chaparral Pro', 18, 'bold'))
+header3.grid(row=1, column=2,padx=10,pady=10,sticky="W")
 header4 = ctk.CTkLabel(master=window, text="Password ",font=('Chaparral Pro', 18, 'bold'))
-header4.grid(row=0, column=3,padx=10,pady=10,sticky="W")
+header4.grid(row=1, column=3,padx=10,pady=10,sticky="W")
 
-
-
-
+visualizza_utenti("")
 window.mainloop()
