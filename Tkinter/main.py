@@ -6,8 +6,7 @@ import pymssql
 
 
 # collegamento db
-conn = pymssql.connect(server='192.168.40.16\sqlexpress', user='porta.matteo', password='xxx123##', database='porta.matteo')
-
+conn = pymssql.connect(server='5.172.64.20\sqlexpress', user='porta.matteo', password='xxx123##', database='porta.matteo')
 window = ctk.CTk()
 
 # specifiche finestra
@@ -38,8 +37,20 @@ ctk.set_appearance_mode("Dark")  # Modes: system (default), light, dark
 ctk.set_default_color_theme("green")  # Themes: blue (default), dark-blue, green
 
 
-def openNewWindow():
-     
+
+
+
+def add_utente(new_user):
+        cursor = conn.cursor(as_dict=True)
+        p = {"name": f"{new_user[0]}","email": f"{new_user[1]}","pwd": f"{new_user[2]}"}
+        q = 'INSERT INTO utente VALUES(%(name)s, %(email)s, %(pwd)s)' 
+        cursor.execute(q, p)
+        conn.commit()
+        # Chiude la connessione al server SQL
+        cursor.close()
+        return 'ciao'
+
+def finestra_crea():
     # Toplevel object which will
     # be treated as a new window
     newWindow = ctk.CTkToplevel(window)
@@ -49,43 +60,39 @@ def openNewWindow():
     newWindow.title("Finestra di Ricerca")
  
     # sets the geometry of toplevel
-    newWindow.geometry("500x800")
+    newWindow.geometry("400x200")
  
-    # A Label widget to show in toplevel
-    Label(newWindow,
-          text ="This is a new window")
- 
- 
-    label = Label(window,
-                text ="This is the main window", font=("Helvetica", 18))
- 
-    Frm = ctk.CTkFrame(newWindow)
-    Label(Frm,text='Enter Word to Find:').pack(side=LEFT)
-    modify = ctk.CTkEntry(Frm)
+    Frm = ctk.CTkFrame(master = newWindow)
+    Frm.grid(row=0, column = 0,padx=20,pady=20, sticky="nsew")
 
-    modify.pack(side=LEFT, fill=BOTH, expand=1)
+    name = ctk.CTkEntry(Frm,placeholder_text="name")
+    name.grid(row=5, column = 0,padx=20,pady=20,sticky="W")
 
-    modify.focus_set()
+    email = ctk.CTkEntry(Frm,placeholder_text="email")
+    email.grid(row=5, column =1,padx=20,pady=20,sticky="W")
 
-    buttn = ctk.CTkButton(Frm, text='Find')
-    buttn.pack(side=RIGHT)
-    Frm.pack(side=TOP)
+    pwd = ctk.CTkEntry(Frm,placeholder_text="password")
+    pwd.grid(row=7, column =0,padx=20,pady=20,sticky="W")
 
-    txt = Text()
 
-    txt.insert('1.0','''Enter here...''')
-    txt.pack(side=BOTTOM)
+    def click():
+        new_user = []
+        new_user.append(name.get())
+        new_user.append(email.get())
+        new_user.append(pwd.get())
+
+        #richiamo la funzione crea
+        add_utente(new_user)
 
 
 
-
+    buttn = ctk.CTkButton(master=Frm, text='Crea Utente', command=click)
+    buttn.grid(row=7, column = 1,padx=20,pady=20,sticky="W") 
 # a button widget which will open a
 # new window on button click
 btn = ctk.CTkButton(master=window,
-             text ="Ricerca",
-             command = openNewWindow).grid(row=10, column=3,padx=20,pady=20,sticky="W")
-
-             
+             text ="Crea",
+             command = finestra_crea).grid(row=10, column=3,padx=20,pady=20,sticky="W")
 
 
 
@@ -123,13 +130,12 @@ Label(window,text='Enter Word to Find:')
 
 def visualizza_utenti():
     cursor = conn.cursor()
-
     # Esegue la query per recuperare gli utenti
     cursor.execute('SELECT * FROM utente')
     users = cursor.fetchall()
 
-    # Chiude la connessione al server SQL
-
+    # Chiude il cursor
+    cursor.close()
 
     # Visualizza gli utenti nella finestra
     lista = []
@@ -140,27 +146,82 @@ def visualizza_utenti():
             label.grid(row=i+1, column=j,sticky="W",padx=10, pady=10)
             lista.append(value) if j == 0 else None
 
-        modifica = ctk.CTkButton(master=window,text="Modifica" ,command=lambda x=lista[i]: modifica_utente(x))
+        modifica = ctk.CTkButton(master=window,text="Modifica" ,command=lambda x=lista[i]: finestra_modifica(x))
         modifica.grid(row=i+1,column=4,sticky="E",padx=20)
         cancella = ctk.CTkButton(master=window,text="Cancella" ,command=lambda x=lista[i]: cancella_utente(x))
         cancella.grid(row=i+1,column=7,sticky="E")
     print(lista)
 
 
-def modifica_utente(x):
-    print(x)
+def modifica_utente(new_user,x):
+    print(new_user)
+  
+    cursor = conn.cursor()
+    # Esegue la query per recuperare gli utenti
+    p = {"name": f"{new_user[0]}","email": f"{new_user[1]}","pwd": f"{new_user[2]}"}
+    cursor.execute(f'UPDATE utente SET Username = %(name)s, Email = %(email)s, password = %(pwd)s WHERE Id = {x}', p)
+    conn.commit()
+    # Chiude la connessione al server SQL
+    cursor.close()
+    return 'ciao'
+
+def finestra_modifica(x):
+
+    cursor = conn.cursor()
+    # Esegue la query per recuperare gli utenti
+    cursor.execute(f'SELECT * FROM utente WHERE id = {x}')
+    [user] = cursor.fetchall()
+    cursor.close()
+
+    newWindow = ctk.CTkToplevel(window)
+ 
+    # sets the title of the
+    # Toplevel widget
+    newWindow.title("Finestra di Ricerca")
+ 
+    # sets the geometry of toplevel
+    newWindow.geometry("400x200")
+ 
+    Frm = ctk.CTkFrame(master = newWindow)
+    Frm.grid(row=0, column = 0,padx=20,pady=20, sticky="nsew")
+
+    name = ctk.CTkEntry(Frm,placeholder_text=f"{user[1]}")
+    name.grid(row=5, column = 0,padx=20,pady=20,sticky="W")
+
+    email = ctk.CTkEntry(Frm,placeholder_text=f"{user[2]}")
+    email.grid(row=5, column =1,padx=20,pady=20,sticky="W")
+
+    pwd = ctk.CTkEntry(Frm,placeholder_text=f"{user[3]}")
+    pwd.grid(row=7, column =0,padx=20,pady=20,sticky="W")
+
+        
+    def click():
+        new_user = []
+        new_user.append(name.get())
+        new_user.append(email.get())
+        new_user.append(pwd.get())
+
+        #richiamo la funzione modifica
+        modifica_utente(new_user,x)
+
+
+
+    buttn = ctk.CTkButton(master=Frm, text='Modifica',command=click)
+    buttn.grid(row=7, column = 1,padx=20,pady=20,sticky="W")
+
+
     return x 
+
 
 def cancella_utente(x):
     print(x)
     cursor = conn.cursor()
-
     # Esegue la query per recuperare gli utenti
     cursor.execute(f'DELETE FROM utente WHERE Id = {x}')
     conn.commit()
     # Chiude la connessione al server SQL
-
-
+    cursor.close()
+    window.update()
     return x
 
 
