@@ -8,7 +8,9 @@ ctk.set_appearance_mode("Dark")  # Modes: system (default), light, dark
 ctk.set_default_color_theme("green")  # Themes: blue (default), dark-blue, green
 
 # collegamento db
-conn = pymssql.connect(server='5.172.64.20\sqlexpress', user='porta.matteo', password='xxx123##', database='porta.matteo')
+#192.168.40.16\SQLEXPRESS
+#5.172.64.20\sqlexpress
+#conn = pymssql.connect(server='192.168.40.16\SQLEXPRESS', user='porta.matteo', password='xxx123##', database='porta.matteo')
 labels = []
 window = ctk.CTk()
 
@@ -235,5 +237,5 @@ header3.grid(row=1, column=2,padx=10,pady=10,sticky="W")
 header4 = ctk.CTkLabel(master=window, text="Password ",font=('Chaparral Pro', 18, 'bold'))
 header4.grid(row=1, column=3,padx=10,pady=10,sticky="W")
 
-visualizza_utenti("")
+#visualizza_utenti("")
 window.mainloop()
